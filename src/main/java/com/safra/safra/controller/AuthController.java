@@ -10,18 +10,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 public class AuthController {
 
     private final CustomUserDetailsService userDetailsService;
@@ -53,33 +52,40 @@ public class AuthController {
         return ResponseEntity.ok("User registered successfully");
     }
 
-    @PostMapping("/login")
+    @PostMapping("/adminlogin")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
         try {
-            // Load user entity from DB
             User user = userRepository.findByEmail(credentials.get("email"))
                     .orElseThrow(() -> new Exception("User not found"));
-
-            if (Boolean.TRUE.equals(user.getIsBanned())) {
-                throw new Exception("This account is banned");
-            }
-
-            if (!Boolean.TRUE.equals(user.isEmailVerified())) {
-                throw new Exception("Email not verified");
-            }
-
             if (!passwordEncoder.matches(credentials.get("password"), user.getPassword())) {
                 throw new Exception("Incorrect password");
             }
+            if (user.getRole() != Role.ADMIN) {
+                throw new Exception("Access denied: Admins only");
+            }
 
+            // Generate JWT
             String token = jwtUtil.generateToken(userDetailsService.loadUserByUsername(user.getEmail()));
-            return ResponseEntity.ok(Map.of("token", token));
+
+            // Return token + user info
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("user", Map.of(
+                    "id", user.getId(),
+                    "name", user.getName(),
+                    "email", user.getEmail(),
+                    "role", user.getRole()
+            ));
+
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            System.out.println("Login attempt: " + credentials.get("email") + " failed: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", e.getMessage()));
         }
     }
+
+
 
 }
 
