@@ -32,34 +32,30 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Email already exists");
         }
 
+        // Set user properties - Email is automatically verified after registration
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setGender(user.getGender());
-        user.setBirthDate(user.getBirthDate());
-        user.setPhoneNumber(user.getPhoneNumber());
-        user.setEmail(user.getEmail());
         user.setIsBanned(false);
-        user.setEmailVerified(false);
-        if(user.getProfilePicture() != null) {
-            user.setProfilePicture(user.getProfilePicture());
-        }
+        user.setEmailVerified(true); // Set to true - no email verification required
         user.setRole(Role.CLIENT);
         user.setJoinDate(LocalDateTime.now());
-        userRepository.save(user);
 
+        // Save user
+        User savedUser = userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully");
+        System.out.println("✅ USER REGISTERED: " + savedUser.getEmail());
+        System.out.println("✅ USER CAN LOGIN IMMEDIATELY: " + savedUser.getEmail());
+
+        return ResponseEntity.ok("User registered successfully. You can now login.");
     }
 
-    @PostMapping("/adminlogin")
+    @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials) {
         try {
             User user = userRepository.findByEmail(credentials.get("email"))
                     .orElseThrow(() -> new Exception("User not found"));
+
             if (!passwordEncoder.matches(credentials.get("password"), user.getPassword())) {
                 throw new Exception("Incorrect password");
-            }
-            if (user.getRole() != Role.ADMIN) {
-                throw new Exception("Access denied: Admins only");
             }
 
             // Generate JWT
@@ -75,15 +71,14 @@ public class AuthController {
                     "role", user.getRole()
             ));
 
+            System.out.println("✅ LOGIN SUCCESSFUL: " + user.getEmail());
+
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+            System.out.println("❌ LOGIN FAILED: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", e.getMessage()));
         }
     }
-
-
-
 }
-

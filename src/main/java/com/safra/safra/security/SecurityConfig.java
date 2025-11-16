@@ -15,6 +15,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -26,26 +27,22 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // configure CORS using the CorsConfigurationSource bean below (non-deprecated)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // disable CSRF
                 .csrf(AbstractHttpConfigurer::disable)
-                // authorization rules
                 .authorizeHttpRequests(auth -> auth
-                        // allow preflight requests
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        // public auth endpoints
                         .requestMatchers("/auth/**").permitAll()
-                        // secure admin endpoints (match your controller path)
+                        .requestMatchers("/api/debug/**").permitAll()
+                        .requestMatchers("/api/test/**").permitAll()
+                        // Add these for better testing
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/actuator/health").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        // everything else authenticated
                         .anyRequest().authenticated()
                 )
-                // stateless session (JWT)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                // add jwt filter before UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -54,13 +51,21 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // for development allow localhost:4200. For production list explicit origins.
-        config.setAllowedOrigins(List.of("http://localhost:4200"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // allow Authorization header because frontend sends Bearer token
-        config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "X-Requested-With"));
+
+        // Allow Postman and all testing tools
+        config.setAllowedOriginPatterns(List.of(
+                "http://localhost:*",
+                "http://10.0.2.2:*",
+                "https://web.postman.co*",  // Postman web
+                "chrome-extension://*"      // Postman desktop
+        ));
+
+        // Or use this for complete development flexibility:
+        // config.setAllowedOriginPatterns(List.of("*"));
+
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        config.setAllowedHeaders(List.of("*"));  // Allow all headers
         config.setExposedHeaders(List.of("Authorization"));
-        // if you use cookies or credentials, keep true (and do NOT use "*")
         config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
