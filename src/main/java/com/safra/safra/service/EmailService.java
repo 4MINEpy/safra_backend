@@ -53,6 +53,47 @@ public class EmailService {
         }
     }
 
+    public void sendPasswordResetEmail(String toEmail, String code) {
+        log.info("📧 Attempting to send password reset email to: {}", toEmail);
+        log.info("📧 Email enabled: {}", emailEnabled);
+
+        if (!emailEnabled) {
+            logDevelopmentPasswordReset(toEmail, code);
+            return;
+        }
+
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setTo(toEmail);
+            message.setFrom("youssoufa003@gmail.com");
+            message.setSubject("Password Reset Code - SAFRA");
+            message.setText(
+                    "You requested a password reset. Use the code below to reset your password:\n\n" +
+                            code + "\n\n" +
+                            "This code expires in 10 minutes. If you didn't request a reset, ignore this message.\n\n" +
+                            "Thank you,\nSAFRA Team"
+            );
+
+            mailSender.send(message);
+            log.info("✅ Password reset email sent successfully to: {}", toEmail);
+
+        } catch (Exception e) {
+            log.error("❌ Failed to send password reset email to {}: {}", toEmail, e.getMessage(), e);
+            logDevelopmentPasswordReset(toEmail, code);
+        }
+    }
+
+    private void logDevelopmentPasswordReset(String toEmail, String code) {
+        log.info("🔐 DEVELOPMENT MODE - Password reset email would be sent to: {}", toEmail);
+        log.info("🔑 Reset Code: {}", code);
+
+        System.out.println("\n" + "=".repeat(70));
+        System.out.println("📧 PASSWORD RESET (DEVELOPMENT MODE)");
+        System.out.println("📧 To: " + toEmail);
+        System.out.println("🔑 Reset Code: " + code);
+        System.out.println("=".repeat(70) + "\n");
+    }
+
     private void logDevelopmentMode(String toEmail, String token) {
         log.info("🔐 DEVELOPMENT MODE - Email would be sent to: {}", toEmail);
         log.info("🔑 Token: {}", token);
