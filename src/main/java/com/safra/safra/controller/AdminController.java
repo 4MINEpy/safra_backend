@@ -1,6 +1,7 @@
 package com.safra.safra.controller;
 
 import com.safra.safra.entity.Role;
+import com.safra.safra.entity.Gender;
 import com.safra.safra.entity.User;
 import com.safra.safra.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -72,6 +75,53 @@ public class AdminController {
 	// Ban/unban user
 	public static class BanRequest {
 		public Boolean banned;
+	}
+
+	// Update user profile (non-sensitive fields only)
+	public static class ProfileUpdateRequest {
+		public String name;
+		public String profilePicture; // filename or path
+		public String gender; // expected values like MALE, FEMALE, OTHER (matches Gender enum)
+		public String birthDate; // ISO date yyyy-MM-dd
+	}
+
+	@PatchMapping("/users/{id}/profile")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ResponseEntity<?> updateUserProfile(@PathVariable long id, @RequestBody ProfileUpdateRequest req) {
+		Optional<User> userOpt = userRepository.findById(id);
+		if (userOpt.isEmpty()) {
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+		}
+		if (req == null) {
+			return ResponseEntity.badRequest().body("Empty request body");
+		}
+		User user = userOpt.get();
+
+		if (req.name != null) {
+			user.setName(req.name);
+		}
+		if (req.profilePicture != null) {
+			user.setProfilePicture(req.profilePicture);
+		}
+		if (req.gender != null) {
+			try {
+				Gender g = Gender.valueOf(req.gender.trim().toUpperCase());
+				user.setGender(g);
+			} catch (IllegalArgumentException ex) {
+				return ResponseEntity.badRequest().body("Invalid gender: " + req.gender);
+			}
+		}
+		if (req.birthDate != null) {
+			try {
+				LocalDate bd = LocalDate.parse(req.birthDate);
+				user.setBirthDate(bd);
+			} catch (DateTimeParseException ex) {
+				return ResponseEntity.badRequest().body("Invalid birthDate format, expected yyyy-MM-dd");
+			}
+		}
+
+		userRepository.save(user);
+		return ResponseEntity.ok(user);
 	}
 
 	@PutMapping("/users/{id}/ban")

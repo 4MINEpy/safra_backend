@@ -56,7 +56,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         // for development allow localhost:4200. For production list explicit origins.
         config.setAllowedOrigins(List.of("http://localhost:4200"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
         // allow Authorization header because frontend sends Bearer token
         config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "X-Requested-With"));
         config.setExposedHeaders(List.of("Authorization"));
