@@ -8,6 +8,7 @@ import com.safra.safra.service.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -77,6 +78,39 @@ public class AuthController {
 
         } catch (Exception e) {
             System.out.println("❌ LOGIN FAILED: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+    @PostMapping("/adminlogin")
+    @PreAuthorize("hasAnyRole('ADMIN')")
+    public ResponseEntity<?> loginAdmin(@RequestBody Map<String, String> credentials) {
+        try {
+            User user = userRepository.findByEmail(credentials.get("email"))
+                    .orElseThrow(() -> new Exception("User not found"));
+            if (!passwordEncoder.matches(credentials.get("password"), user.getPassword())) {
+                throw new Exception("Incorrect password");
+            }
+            if (user.getRole() != Role.ADMIN) {
+                throw new Exception("Access denied: Admins only");
+            }
+
+            // Generate JWT
+            String token = jwtUtil.generateToken(userDetailsService.loadUserByUsername(user.getEmail()));
+
+            // Return token + user info
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", token);
+            response.put("user", Map.of(
+                    "id", user.getId(),
+                    "name", user.getName(),
+                    "email", user.getEmail(),
+                    "role", user.getRole()
+            ));
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", e.getMessage()));
         }
