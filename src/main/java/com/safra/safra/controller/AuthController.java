@@ -83,7 +83,6 @@ public class AuthController {
         }
     }
     @PostMapping("/adminlogin")
-    @PreAuthorize("hasAnyRole('ADMIN')")
     public ResponseEntity<?> loginAdmin(@RequestBody Map<String, String> credentials) {
         try {
             User user = userRepository.findByEmail(credentials.get("email"))
