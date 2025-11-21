@@ -1,6 +1,7 @@
 package com.safra.safra.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,5 +46,9 @@ public class User {
     private LocalDateTime joinDate;
     @Column(nullable = false)
     private boolean isEmailVerified = false;
+
+    @OneToOne(mappedBy = "owner",cascade = CascadeType.ALL)
+    @JsonManagedReference
+    private Car car;
 
 }

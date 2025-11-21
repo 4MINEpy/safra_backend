@@ -36,6 +36,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         // public auth endpoints
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/cars/**").permitAll()
+                        .requestMatchers("/trips/**").permitAll()
                         // secure admin endpoints (match your controller path)
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         // everything else authenticated
