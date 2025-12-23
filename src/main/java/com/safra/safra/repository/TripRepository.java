@@ -1,8 +1,11 @@
 package com.safra.safra.repository;
 
 import com.safra.safra.entity.Trip;
+import org.locationtech.jts.triangulate.tri.Tri;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface TripRepository extends JpaRepository<Trip, Long> {
+import java.util.List;
 
+public interface TripRepository extends JpaRepository<Trip, Long> {
+    List<Trip> findByDriverId(Long driverId);
 }
