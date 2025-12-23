@@ -80,9 +80,7 @@ public class AdminController {
 	public static class BanRequest {
 		public Boolean banned;
 	}
-	 public static class ArchiveRequest {
-		public Boolean archived;
-	}
+
 
 	// Update user profile (non-sensitive fields only)
 	public static class ProfileUpdateRequest {
