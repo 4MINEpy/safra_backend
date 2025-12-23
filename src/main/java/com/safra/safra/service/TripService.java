@@ -44,8 +44,8 @@ public class TripService {
 
         // Convert coordinates to Point
         GeometryFactory geometryFactory = new GeometryFactory();
-        Point start = geometryFactory.createPoint(new Coordinate(dto.getStartLocation().getX(), dto.getStartLocation().getY()));
-        Point end = geometryFactory.createPoint(new Coordinate(dto.getEndLocation().getX(), dto.getEndLocation().getY()));
+        Point start = geometryFactory.createPoint(new Coordinate(dto.getStartX(), dto.getStartY()));
+        Point end = geometryFactory.createPoint(new Coordinate(dto.getEndX(), dto.getEndY()));
         trip.setStartLocation(start);
         trip.setEndLocation(end);
 
