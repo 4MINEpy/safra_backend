@@ -1,9 +1,12 @@
 package com.safra.safra.controller;
 
+import com.safra.safra.dto.RideRequestDTO;
+import com.safra.safra.entity.RideRequest;
 import com.safra.safra.entity.Trip;
 import com.safra.safra.entity.User;
 import com.safra.safra.repository.TripRepository;
 import com.safra.safra.repository.UserRepository;
+import com.safra.safra.service.RideRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +22,7 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final TripRepository tripRepository;
+    private final RideRequestService rideRequestService;
 
     @GetMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @userSecurity.isSelf(#id)")
@@ -44,6 +48,41 @@ public class UserController {
         }
 
         return ResponseEntity.ok(trips);
+    }
+
+    @PostMapping("/request")
+    public ResponseEntity<?> requestRide(@RequestBody RideRequestDTO dto) {
+
+        Trip trip = tripRepository.findById(dto.getTripId())
+                .orElseThrow(() -> new RuntimeException("Trip not found"));
+
+        User passenger = userRepository.findById(dto.getPassengerId())
+                .orElseThrow(() -> new RuntimeException("Passenger not found"));
+
+        RideRequest request = dto.toEntity(trip, passenger);
+
+        request = rideRequestService.createRequest(request);
+
+        return ResponseEntity.ok(request);
+    }
+
+    @PostMapping("/{id}/accept")
+    public ResponseEntity<?> accept(@PathVariable Long id) {
+        return ResponseEntity.ok(rideRequestService.acceptRideRequest(id));
+    }
+
+    @PostMapping("/{id}/reject")
+    public ResponseEntity<?> reject(@PathVariable Long id) {
+        return ResponseEntity.ok(rideRequestService.rejectRideRequest(id));
+    }
+
+    @GetMapping("/driver/{driverId}/requests")
+    public ResponseEntity<?> getDriverRideRequests(@PathVariable Long driverId) {
+        return ResponseEntity.ok(rideRequestService.getRequestsForDriver(driverId));
+    }
+    @GetMapping("passenger/{passengerId}/requests")
+    public ResponseEntity<?> getPassengerRideRequests(@PathVariable Long passengerId) {
+        return ResponseEntity.ok(rideRequestService.getRequestsForPassenger(passengerId));
     }
 
 }

@@ -4,6 +4,7 @@ import com.safra.safra.dto.TripRequestDTO;
 import com.safra.safra.entity.Trip;
 import com.safra.safra.service.TripService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,8 +31,42 @@ public class TripController {
     public void deleteTrip(@PathVariable Long id) {
         tripService.deleteTrip(id);
     }
-    @RequestMapping(value = "/trips",method = RequestMethod.PUT)
-    public void updateTrip(@RequestBody Trip trip) {
-        tripService.updateTrip(trip);
+    @PutMapping("/trips")
+    public ResponseEntity<?> updateTrip(@RequestBody TripRequestDTO dto) {
+        Trip updated = tripService.updateTrip(dto);
+        return ResponseEntity.ok(updated);
     }
+
+    @GetMapping("trips/{tripId}/passengers")
+    public ResponseEntity<?> getPassengers(@PathVariable Long tripId) {
+        return ResponseEntity.ok(tripService.getPassengersForTrip(tripId));
+    }
+
+    @DeleteMapping("trips/{tripId}/passengers/{passengerId}")
+    public ResponseEntity<?> removePassenger(
+            @PathVariable Long tripId,
+            @PathVariable Long passengerId
+    ) {
+        tripService.removePassengerFromTrip(tripId, passengerId);
+        return ResponseEntity.ok("Passenger removed successfully");
+    }
+    @PutMapping("trips/{tripId}/cancel")
+    public ResponseEntity<?> cancelTrip(
+            @PathVariable Long tripId,
+            @RequestParam Long driverId
+    ) {
+        Trip trip = tripService.cancelTrip(tripId, driverId);
+        return ResponseEntity.ok(trip);
+    }
+    @PutMapping("trips/{tripId}/leave")
+    public ResponseEntity<?> leaveTrip(
+            @PathVariable Long tripId,
+            @RequestParam Long passengerId
+    ) {
+        Trip trip = tripService.removePassenger(tripId, passengerId);
+        return ResponseEntity.ok(trip);
+    }
+
+
+
 }
