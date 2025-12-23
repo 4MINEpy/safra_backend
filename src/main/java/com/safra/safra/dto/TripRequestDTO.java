@@ -20,3 +20,5 @@ public class TripRequestDTO {
     private float price;
     private String status;
 }
+
+
