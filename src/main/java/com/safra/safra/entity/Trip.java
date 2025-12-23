@@ -51,6 +51,16 @@ public class Trip {
     @Column
     private String description;
 
+    public Boolean isIs_archived() {
+        return is_archived;
+    }
+
+    public void setIs_archived(boolean is_archived) {
+        this.is_archived = is_archived;
+    }
+
+    @Column(nullable = true)
+    private Boolean is_archived=false;
     @Column
     private int availableSeats;
 

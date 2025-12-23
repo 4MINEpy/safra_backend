@@ -1,0 +1,119 @@
+[33mcommit 31c3ca7cf01b219270952823af43c387522f4368[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Merge: 4dbbca2 98cca42
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Tue Dec 23 19:14:41 2025 +0100
+
+    amin2 12/23
+
+[33mcommit 4dbbca2fb219f67b2cb81f612e3ce555c25d8a15[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Tue Dec 23 19:05:13 2025 +0100
+
+    amin 12/23
+
+[33mcommit 98cca42cc7676a590dc9c7d2e7ae488c936ebaf8[m
+Merge: 9478b3a 7c47921
+Author: myt003 <155334207+myt003@users.noreply.github.com>
+Date:   Tue Dec 23 17:59:53 2025 +0100
+
+    Merge remote-tracking branch 'origin/main'
+    
+    # Conflicts:
+    #       src/main/java/com/safra/safra/dto/TripRequestDTO.java
+
+[33mcommit 9478b3a22913a10d094a58fbfd77f447fa05f6ff[m
+Author: myt003 <155334207+myt003@users.noreply.github.com>
+Date:   Tue Dec 23 17:56:25 2025 +0100
+
+    changes 23/12
+
+[33mcommit 3b038bff2a9c57372ab11c8c2f089434bf43f201[m
+Author: myt003 <155334207+myt003@users.noreply.github.com>
+Date:   Tue Dec 23 17:46:48 2025 +0100
+
+    version changes 23/12
+
+[33mcommit 7c479211b0a9d3d4b5c99ff479269d591d318ff3[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Fri Nov 21 23:01:49 2025 +0100
+
+    added finding users trips
+
+[33mcommit 54a694200a822274a11b62d4a3592ce7bae11fef[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Fri Nov 21 11:39:29 2025 +0100
+
+    added users API
+
+[33mcommit 346812246207af5087e364712f4cb3296ade2740[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Fri Nov 21 10:29:08 2025 +0100
+
+    added trips and cars API
+
+[33mcommit f6f42c57accffd485417c726559d833fdf983290[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Mon Nov 17 22:16:35 2025 +0100
+
+    added password reset/email verification
+
+[33mcommit 249c462b565dd519a229c08ebe422a727509abe4[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Mon Nov 17 18:08:13 2025 +0100
+
+    fixed admin login
+
+[33mcommit e4fca910bcdc9cf0006bfe6f3492c9e657a002b8[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Mon Nov 17 18:06:57 2025 +0100
+
+    added admin login that was deleted
+
+[33mcommit 3fe7b457cf5cb659f35fd3101b7c7643b5e8f009[m
+Merge: 241d43b 1375937
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Mon Nov 17 18:04:14 2025 +0100
+
+    admin user control
+
+[33mcommit 241d43befdbe7319533bb7df4e2b87a567a71037[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Mon Nov 17 17:57:32 2025 +0100
+
+    admin user control
+
+[33mcommit 1375937b2efdae8fde60155a5df94b837bbc46fc[m
+Author: myt003 <155334207+myt003@users.noreply.github.com>
+Date:   Sun Nov 16 17:06:33 2025 +0100
+
+    the login backend is implemented
+
+[33mcommit 154cf9cf892f3be7616938b0db8e85e4131c596a[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Mon Nov 10 19:17:30 2025 +0100
+
+    added admin API
+
+[33mcommit 375c47e6706c21753467ae04097738b6b270c67d[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Sun Nov 9 12:35:21 2025 +0100
+
+    added admin login
+
+[33mcommit f27ea9fb8135f214a4bb2b636df4079c812a0e7e[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Fri Nov 7 22:59:17 2025 +0100
+
+    added JWT and Structure for email verification
+
+[33mcommit bc037b4925f133a6cf60c0ea141b6f9b69b99e9f[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Fri Nov 7 11:11:57 2025 +0100
+
+    Added security config
+
+[33mcommit 55d38fba3d84dfe2188ea5eccde119056b5fe86d[m
+Author: 4MINEpy <aminmedfai30@gmail.com>
+Date:   Wed Nov 5 20:37:39 2025 +0100
+
+    first commit

@@ -1,23 +1,19 @@
 package com.safra.safra.dto;
 
+import com.safra.safra.entity.Trip;
 import lombok.Data;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
-
 @Data
 public class TripRequestDTO {
-    @Data
-    public static class LocationDTO {
-        private double x;
-        private double y;
-    }
     private Long id;
     private Long driverId;
     private List<Long> passengerIds;
-    private LocationDTO startLocation;
-    private LocationDTO endLocation;
+    private double startX;
+    private double startY;
+    private double endX;
+    private double endY;
     private LocalDateTime startTime;
     private String description;
     private int availableSeats;

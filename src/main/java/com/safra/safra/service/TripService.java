@@ -32,10 +32,13 @@ public class TripService {
     public List<Trip> getAllTrips() {
         return tripRepository.findAll();
     }
+
     public Optional<Trip> getTripById(Long id) {
         return tripRepository.findById(id);
     }
-    public void createTrip(TripRequestDTO dto) {
+
+    // FIXED: Return Trip instead of void
+    public Trip createTrip(TripRequestDTO dto) {
         Trip trip = new Trip();
 
         // Set driver
@@ -48,8 +51,8 @@ public class TripService {
 
         // Convert coordinates to Point
         GeometryFactory geometryFactory = new GeometryFactory();
-        Point start = geometryFactory.createPoint(new Coordinate(dto.getStartLocation().getX(), dto.getStartLocation().getY()));
-        Point end = geometryFactory.createPoint(new Coordinate(dto.getEndLocation().getX(), dto.getEndLocation().getY()));
+        Point start = geometryFactory.createPoint(new Coordinate(dto.getStartX(), dto.getStartY()));
+        Point end = geometryFactory.createPoint(new Coordinate(dto.getEndX(), dto.getEndY()));
         trip.setStartLocation(start);
         trip.setEndLocation(end);
 
@@ -60,11 +63,15 @@ public class TripService {
         trip.setPrice(dto.getPrice());
         trip.setStatus(dto.getStatus());
 
-        // Save trip
-         tripRepository.save(trip);
+        // FIXED: Return the saved trip
+        return tripRepository.save(trip);
     }
-    public void deleteTrip(Long id) {tripRepository.deleteById(id);}
 
+    public void deleteTrip(Long id) {
+        tripRepository.deleteById(id);
+    }
+
+    // FIXED: Return Trip instead of void and accept ID parameter
     public Trip updateTrip(TripRequestDTO dto) {
         Trip trip = tripRepository.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("Trip not found"));
@@ -83,8 +90,8 @@ public class TripService {
 
         // Update locations
         GeometryFactory geometryFactory = new GeometryFactory();
-        Point start = geometryFactory.createPoint(new Coordinate(dto.getStartLocation().getX(), dto.getStartLocation().getY()));
-        Point end   = geometryFactory.createPoint(new Coordinate(dto.getEndLocation().getX(), dto.getEndLocation().getY()));
+        Point start = geometryFactory.createPoint(new Coordinate(dto.getStartX(), dto.getStartY()));
+        Point end   = geometryFactory.createPoint(new Coordinate(dto.getEndX(), dto.getEndY()));
         trip.setStartLocation(start);
         trip.setEndLocation(end);
 
@@ -98,6 +105,14 @@ public class TripService {
         return tripRepository.save(trip);
     }
 
+
+    // ADD THIS METHOD: For archiving trips
+    public Trip setTripArchiveStatus(Long tripId, Boolean archived) {
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new RuntimeException("Trip not found with id: " + tripId));
+        trip.setIs_archived(archived);
+        return tripRepository.save(trip);
+    }
     public List<User> getPassengersForTrip(Long tripId) {
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new RuntimeException("Trip not found"));
