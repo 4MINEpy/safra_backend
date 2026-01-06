@@ -44,7 +44,13 @@ public class User {
     private Boolean isBanned;
     @Column
     private LocalDateTime joinDate;
+    @Column(name = "average_rating")
+    private Double averageRating;
 
+    @Column(name = "total_ratings")
+    private Integer totalRatings = 0;
+    @Column(name = "fcm_token")
+    private String fcmToken;
     public Boolean isIs_archived() {
         return is_archived;
     }

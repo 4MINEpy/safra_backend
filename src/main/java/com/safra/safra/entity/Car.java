@@ -23,7 +23,8 @@ public class Car {
     private String model;
     @Column
     private String color;
-
+    @Column
+    private String fuelType;
     @OneToOne
     @JoinColumn(name = "owner", nullable = false)
     @JsonBackReference
