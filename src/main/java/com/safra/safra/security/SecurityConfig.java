@@ -40,8 +40,18 @@ public class SecurityConfig {
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/cars/**").permitAll()
                         .requestMatchers("/trips/**").permitAll()
+                        // public subscription plans endpoint
+                        .requestMatchers(HttpMethod.GET, "/api/subscriptions/plans/**").permitAll()
+                        // public payment endpoints (webhook and config)
+                        .requestMatchers("/api/payments/stripe/webhook").permitAll()
+                        .requestMatchers("/api/payments/stripe/config").permitAll()
+                        .requestMatchers("/api/payments/stripe/verify/**").permitAll()
+                        // faker endpoints (development only - consider removing in production)
+                        .requestMatchers("/api/faker/**").permitAll()
                         // secure admin endpoints (match your controller path)
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/subscriptions/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/payments/admin/**").hasRole("ADMIN")
                         // everything else authenticated
                         .anyRequest().authenticated()
                 )

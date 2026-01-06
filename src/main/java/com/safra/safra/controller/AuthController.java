@@ -1,5 +1,6 @@
 package com.safra.safra.controller;
 
+import com.safra.safra.dto.StudentEmailVerificationDTO;
 import com.safra.safra.entity.Role;
 import com.safra.safra.entity.User;
 import com.safra.safra.entity.EmailVerificationToken;
@@ -8,6 +9,7 @@ import com.safra.safra.repository.EmailVerificationTokenRepository;
 import com.safra.safra.service.EmailService;
 import com.safra.safra.security.JwtUtil;
 import com.safra.safra.service.CustomUserDetailsService;
+import com.safra.safra.service.StudentVerificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +32,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final EmailVerificationTokenRepository tokenRepository;
     private final EmailService emailService;
+    private final StudentVerificationService studentVerificationService;
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody User user) {
@@ -152,5 +155,56 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", e.getMessage()));
         }
+    }
+
+    // ============ STUDENT EMAIL VERIFICATION ============
+
+    /**
+     * Request student email verification
+     * Body: { "userId": 1, "studentEmail": "student@university.edu" }
+     */
+    @PostMapping("/request-student-verification")
+    public ResponseEntity<?> requestStudentVerification(@RequestBody StudentEmailVerificationDTO dto) {
+        try {
+            studentVerificationService.requestStudentVerification(dto.getUserId(), dto.getStudentEmail());
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Verification email sent to " + dto.getStudentEmail()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Verify student email with token
+     */
+    @GetMapping("/verify-student-email")
+    public ResponseEntity<?> verifyStudentEmail(@RequestParam String token) {
+        boolean verified = studentVerificationService.verifyStudentEmail(token);
+        if (verified) {
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Student email verified successfully! You can now purchase the student subscription plan."
+            ));
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                "success", false,
+                "message", "Invalid or expired verification token"
+        ));
+    }
+
+    /**
+     * Check if a user's student email is verified
+     */
+    @GetMapping("/student-status/{userId}")
+    public ResponseEntity<?> getStudentStatus(@PathVariable Long userId) {
+        boolean isVerified = studentVerificationService.isStudentVerified(userId);
+        User user = userRepository.findById(userId).orElse(null);
+        
+        return ResponseEntity.ok(Map.of(
+                "studentVerified", isVerified,
+                "studentEmail", user != null && user.getStudentEmail() != null ? user.getStudentEmail() : ""
+        ));
     }
 }

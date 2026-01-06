@@ -62,4 +62,8 @@ public class User {
     @JsonManagedReference
     private Car car;
 
+    @Column(unique = true,nullable = true)
+    private String studentEmail;
+    @Column
+    private Boolean studentVerified =false;
 }

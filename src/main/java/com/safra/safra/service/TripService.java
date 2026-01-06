@@ -7,6 +7,7 @@ import com.safra.safra.entity.RideRequest;
 import com.safra.safra.entity.Trip;
 import com.safra.safra.entity.User;
 import com.safra.safra.repository.RideRequestRepository;
+import com.safra.safra.repository.SubscriptionRepository;
 import com.safra.safra.repository.TripRepository;
 import com.safra.safra.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.Point;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +30,7 @@ public class TripService {
     private final TripRepository tripRepository;
     private final UserRepository userRepository;
     private final RideRequestRepository rideRequestRepository;
+    private final SubscriptionService subscriptionService;
 
     public List<Trip> getAllTrips() {
         return tripRepository.findAll();
@@ -37,8 +40,16 @@ public class TripService {
         return tripRepository.findById(id);
     }
 
-    // FIXED: Return Trip instead of void
+    /**
+     * Create a trip - requires valid subscription with remaining trips
+     */
+    @Transactional
     public Trip createTrip(TripRequestDTO dto) {
+        // First, verify the driver has a valid subscription
+        if (!subscriptionService.canUserCreateTrip(dto.getDriverId())) {
+            throw new RuntimeException("You need an active subscription with remaining trips to create a trip. Please purchase or renew your subscription.");
+        }
+
         Trip trip = new Trip();
 
         // Set driver
@@ -63,15 +74,16 @@ public class TripService {
         trip.setPrice(dto.getPrice());
         trip.setStatus(dto.getStatus());
 
-        // FIXED: Return the saved trip
+        // Use one trip from the subscription
+        subscriptionService.useTrip(dto.getDriverId());
+
+        // Save and return the trip
         return tripRepository.save(trip);
     }
 
     public void deleteTrip(Long id) {
         tripRepository.deleteById(id);
     }
-
-    // FIXED: Return Trip instead of void and accept ID parameter
     public Trip updateTrip(TripRequestDTO dto) {
         Trip trip = tripRepository.findById(dto.getId())
                 .orElseThrow(() -> new RuntimeException("Trip not found"));
