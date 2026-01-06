@@ -1,6 +1,8 @@
 package com.safra.safra.service;
 
 import com.safra.safra.entity.RequestStatus;
+import com.safra.safra.service.NotificationService;
+
 import com.safra.safra.entity.RideRequest;
 import com.safra.safra.entity.Trip;
 import com.safra.safra.entity.User;
@@ -19,6 +21,7 @@ public class RideRequestService {
 
     private final RideRequestRepository rideRequestRepository;
     private final TripRepository tripRepository;
+    private final NotificationService notificationService; // Add this
 
     public RideRequest createRequest(RideRequest rideRequest) {
         rideRequest.setStatus(RequestStatus.PENDING);
@@ -51,7 +54,8 @@ public class RideRequestService {
         // Persist changes
         tripRepository.save(trip);
         rideRequestRepository.save(request);
-
+        // After accepting request
+        notificationService.sendBookingConfirmation(passenger, trip);
         return request;
     }
 

@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 
 @SpringBootApplication
-@EnableScheduling
+@EnableScheduling // ADD THIS
 public class SafraApplication {
 
 	public static void main(String[] args) {

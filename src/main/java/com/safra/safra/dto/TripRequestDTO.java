@@ -17,8 +17,9 @@ public class TripRequestDTO {
     private LocalDateTime startTime;
     private String description;
     private int availableSeats;
-    private float price;
     private String status;
+    private Float price; // Changed to Float (nullable)
+    private String fuelType;
 }
 
 

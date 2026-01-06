@@ -69,7 +69,17 @@ public class SecurityConfig {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         // for development allow localhost:4200. For production list explicit origins.
-        config.setAllowedOrigins(List.of("http://localhost:4200"));
+        config.setAllowedOrigins(List.of(
+                "http://localhost:4200",                    // Angular frontend
+                "http://localhost:8100",                    // Ionic frontend
+                "http://localhost:8087",                    // React frontend
+                "http://10.0.2.2",                          // Android Emulator (all ports)
+                "http://10.0.2.2:8080",                     // Android Emulator specific port
+                "http://10.0.2.2:8081",
+                "http://10.0.2.2:4200",
+                "http://192.168.1.*",                       // Local network (adjust IP)
+                "http://localhost"                          // For local testing
+        ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS","PATCH"));
         // allow Authorization header because frontend sends Bearer token
         config.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type", "X-Requested-With"));

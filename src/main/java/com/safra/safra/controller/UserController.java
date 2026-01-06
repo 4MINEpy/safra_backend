@@ -12,7 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
+import java.util.Map;
 import java.util.List;
 
 @RestController
@@ -84,5 +84,20 @@ public class UserController {
     public ResponseEntity<?> getPassengerRideRequests(@PathVariable Long passengerId) {
         return ResponseEntity.ok(rideRequestService.getRequestsForPassenger(passengerId));
     }
+    @PutMapping("/{userId}/fcm-token")
+    public ResponseEntity<?> updateFcmToken(
+            @PathVariable Long userId,
+            @RequestBody Map<String, String> tokenData) {
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
+            user.setFcmToken(tokenData.get("fcmToken"));
+            userRepository.save(user);
+
+            return ResponseEntity.ok(Map.of("success", true));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }
