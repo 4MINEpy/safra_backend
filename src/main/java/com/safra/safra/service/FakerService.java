@@ -85,6 +85,10 @@ public class FakerService {
             "Marron", "Orange", "Jaune", "Bordeaux", "Anthracite", "Bleu Marine"
     };
 
+    private static final String[] FUEL_TYPES = {
+            "Essence", "Diesel", "GPL", "Électrique", "Hybride"
+    };
+
     private static final String[] TRIP_DESCRIPTIONS = {
             "🚗 Trajet régulier, musique chill acceptée",
             "🎵 Ambiance détendue, discussion sympa bienvenue",
@@ -179,79 +183,80 @@ public class FakerService {
     }
 
     private void clearExistingData() {
-        log.info("🧹 Clearing existing data using native SQL...");
+        log.info("🧹 Clearing existing data using TRUNCATE (resets ID sequences)...");
         
-        // Use native SQL to handle all foreign key constraints properly
-        // This handles any tables that might exist in the database
+        // Use TRUNCATE with RESTART IDENTITY CASCADE to properly reset sequences
+        // This fixes the ID generation issue where IDs would continue from where they left off
         
         try {
-            // Disable foreign key checks temporarily and clear all tables
-            entityManager.createNativeQuery("DELETE FROM trip_passengers").executeUpdate();
-            log.info("   ✓ Trip passengers cleared");
+            // Truncate all tables in dependency order with CASCADE
+            // Using RESTART IDENTITY to reset the auto-increment sequences
+            entityManager.createNativeQuery("TRUNCATE TABLE trip_passengers RESTART IDENTITY CASCADE").executeUpdate();
+            log.info("   ✓ Trip passengers truncated");
         } catch (Exception e) {
             log.warn("   ⚠ trip_passengers table not found or empty");
         }
         
         try {
-            entityManager.createNativeQuery("DELETE FROM ride_requests").executeUpdate();
-            log.info("   ✓ Ride requests cleared");
+            entityManager.createNativeQuery("TRUNCATE TABLE ride_requests RESTART IDENTITY CASCADE").executeUpdate();
+            log.info("   ✓ Ride requests truncated");
         } catch (Exception e) {
             log.warn("   ⚠ ride_requests table not found or empty");
         }
         
         try {
             // Clear any legacy payments table that might exist
-            entityManager.createNativeQuery("DELETE FROM payments").executeUpdate();
-            log.info("   ✓ Legacy payments cleared");
+            entityManager.createNativeQuery("TRUNCATE TABLE payments RESTART IDENTITY CASCADE").executeUpdate();
+            log.info("   ✓ Legacy payments truncated");
         } catch (Exception e) {
             log.warn("   ⚠ payments table not found or empty");
         }
         
         try {
-            entityManager.createNativeQuery("DELETE FROM stripe_payments").executeUpdate();
-            log.info("   ✓ Stripe payments cleared");
+            entityManager.createNativeQuery("TRUNCATE TABLE stripe_payments RESTART IDENTITY CASCADE").executeUpdate();
+            log.info("   ✓ Stripe payments truncated");
         } catch (Exception e) {
             log.warn("   ⚠ stripe_payments table not found or empty");
         }
         
         try {
-            entityManager.createNativeQuery("DELETE FROM subscriptions").executeUpdate();
-            log.info("   ✓ Subscriptions cleared");
+            entityManager.createNativeQuery("TRUNCATE TABLE subscriptions RESTART IDENTITY CASCADE").executeUpdate();
+            log.info("   ✓ Subscriptions truncated");
         } catch (Exception e) {
             log.warn("   ⚠ subscriptions table not found or empty");
         }
         
         try {
-            entityManager.createNativeQuery("DELETE FROM trips").executeUpdate();
-            log.info("   ✓ Trips cleared");
+            entityManager.createNativeQuery("TRUNCATE TABLE trips RESTART IDENTITY CASCADE").executeUpdate();
+            log.info("   ✓ Trips truncated");
         } catch (Exception e) {
             log.warn("   ⚠ trips table not found or empty");
         }
         
         try {
-            entityManager.createNativeQuery("DELETE FROM cars").executeUpdate();
-            log.info("   ✓ Cars cleared");
+            entityManager.createNativeQuery("TRUNCATE TABLE cars RESTART IDENTITY CASCADE").executeUpdate();
+            log.info("   ✓ Cars truncated");
         } catch (Exception e) {
             log.warn("   ⚠ cars table not found or empty");
         }
         
         try {
-            entityManager.createNativeQuery("DELETE FROM email_verification_tokens").executeUpdate();
-            log.info("   ✓ Email verification tokens cleared");
+            entityManager.createNativeQuery("TRUNCATE TABLE email_verification_tokens RESTART IDENTITY CASCADE").executeUpdate();
+            log.info("   ✓ Email verification tokens truncated");
         } catch (Exception e) {
             log.warn("   ⚠ email_verification_tokens table not found or empty");
         }
         
         try {
-            entityManager.createNativeQuery("DELETE FROM password_reset_tokens").executeUpdate();
-            log.info("   ✓ Password reset tokens cleared");
+            entityManager.createNativeQuery("TRUNCATE TABLE password_reset_tokens RESTART IDENTITY CASCADE").executeUpdate();
+            log.info("   ✓ Password reset tokens truncated");
         } catch (Exception e) {
             log.warn("   ⚠ password_reset_tokens table not found or empty");
         }
         
         try {
-            entityManager.createNativeQuery("DELETE FROM users").executeUpdate();
-            log.info("   ✓ Users cleared");
+            entityManager.createNativeQuery("TRUNCATE TABLE users RESTART IDENTITY CASCADE").executeUpdate();
+            log.info("   ✓ Users truncated");
         } catch (Exception e) {
             log.warn("   ⚠ users table not found or empty");
         }
@@ -260,7 +265,7 @@ public class FakerService {
         entityManager.flush();
         entityManager.clear();
         
-        log.info("🧹 Existing data cleared successfully");
+        log.info("🧹 Existing data cleared and ID sequences reset successfully");
     }
 
     private List<SubscriptionPlan> ensureSubscriptionPlans() {
@@ -371,6 +376,22 @@ public class FakerService {
                                 "isi.utm.tn", "ensi.rnu.tn", "supcom.tn", "ihec.rnu.tn");
             }
             
+            // Generate rating data for ~60% of users (those who have completed trips)
+            Double averageRating = null;
+            Integer totalRatings = 0;
+            if (random.nextDouble() < 0.6) {
+                totalRatings = random.nextInt(50) + 1;
+                // Ratings tend to be positive (3.5 - 5.0 range with bias towards higher)
+                averageRating = 3.5 + random.nextDouble() * 1.5;
+                averageRating = Math.round(averageRating * 10) / 10.0; // Round to 1 decimal
+            }
+            
+            // Generate FCM token for ~70% of users (those with mobile app installed)
+            String fcmToken = null;
+            if (random.nextDouble() < 0.7) {
+                fcmToken = "fcm_fake_" + UUID.randomUUID().toString().replace("-", "").substring(0, 32);
+            }
+            
             User user = User.builder()
                     .name(name)
                     .email(email)
@@ -386,6 +407,9 @@ public class FakerService {
                     .studentEmail(studentEmail)
                     .studentVerified(isStudent)
                     .profilePicture(null)
+                    .averageRating(averageRating)
+                    .totalRatings(totalRatings)
+                    .fcmToken(fcmToken)
                     .build();
             
             users.add(userRepository.save(user));
@@ -420,6 +444,7 @@ public class FakerService {
             String brand = faker.options().option(CAR_MODELS.keySet().toArray(new String[0]));
             String model = faker.options().option(CAR_MODELS.get(brand));
             String color = faker.options().option(COLORS);
+            String fuelType = faker.options().option(FUEL_TYPES);
             
             // Tunisian registration number format
             String regNumber;
@@ -436,6 +461,7 @@ public class FakerService {
                     .brand(brand)
                     .model(model)
                     .color(color)
+                    .fuelType(fuelType)
                     .owner(user)
                     .build();
             
@@ -582,42 +608,81 @@ public class FakerService {
                 int availableSeats;
                 List<User> tripPassengers = new ArrayList<>();
                 
+                // Navigation and rating data (will be set based on status)
+                Double currentDriverLat = null;
+                Double currentDriverLng = null;
+                Double driverSpeed = null;
+                Float driverBearing = null;
+                LocalDateTime lastLocationUpdate = null;
+                Double tripAverageRating = null;
+                Integer tripTotalRatings = 0;
+                
                 double scenario = random.nextDouble();
                 
                 if (scenario < 0.15) {
                     // Completed trips (15%)
                     startTime = faker.date().past(30, TimeUnit.DAYS)
                             .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    status = "COMPLETED";
+                    status = Trip.Status.COMPLETED;
                     availableSeats = random.nextInt(2);
                     tripPassengers = pickRandomPassengers(passengers, driver, random.nextInt(4));
+                    
+                    // Completed trips have rating data
+                    if (random.nextDouble() < 0.7) {
+                        tripTotalRatings = random.nextInt(tripPassengers.size() + 1);
+                        if (tripTotalRatings > 0) {
+                            tripAverageRating = 3.5 + random.nextDouble() * 1.5;
+                            tripAverageRating = Math.round(tripAverageRating * 10) / 10.0;
+                        }
+                    }
                     
                 } else if (scenario < 0.25) {
                     // Cancelled trips (10%)
                     startTime = faker.date().past(14, TimeUnit.DAYS)
                             .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    status = "CANCELLED";
+                    status = Trip.Status.CANCELED;
                     availableSeats = random.nextInt(4) + 1;
                     
                 } else if (scenario < 0.35) {
-                    // Live/ongoing trips (10%)
+                    // Active/ongoing trips (10%)
                     startTime = LocalDateTime.now().minusMinutes(random.nextInt(120));
-                    status = "LIVE";
+                    status = Trip.Status.ACTIVE;
                     availableSeats = random.nextInt(2);
                     tripPassengers = pickRandomPassengers(passengers, driver, random.nextInt(3) + 1);
                     
-                } else if (scenario < 0.50) {
-                    // Expired/past open trips (15%)
+                    // Active trips have live navigation data
+                    int cityIdx = random.nextInt(TUNISIAN_CITIES.length);
+                    currentDriverLat = TUNISIAN_CITIES[cityIdx][0] + (random.nextDouble() - 0.5) * 0.02;
+                    currentDriverLng = TUNISIAN_CITIES[cityIdx][1] + (random.nextDouble() - 0.5) * 0.02;
+                    driverSpeed = 40.0 + random.nextDouble() * 80; // 40-120 km/h
+                    driverBearing = (float) (random.nextDouble() * 360); // 0-360 degrees
+                    lastLocationUpdate = LocalDateTime.now().minusSeconds(random.nextInt(30));
+                    
+                } else if (scenario < 0.45) {
+                    // Scheduled trips - confirmed future trips (10%)
+                    startTime = faker.date().future(30, TimeUnit.DAYS)
+                            .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+                    status = Trip.Status.SCHEDULED;
+                    availableSeats = random.nextInt(3) + 1;
+                    // Scheduled trips may have some confirmed passengers
+                    if (random.nextDouble() < 0.5) {
+                        int seatsTaken = random.nextInt(Math.min(2, availableSeats)) + 1;
+                        tripPassengers = pickRandomPassengers(passengers, driver, seatsTaken);
+                        availableSeats -= tripPassengers.size();
+                    }
+                    
+                } else if (scenario < 0.55) {
+                    // Expired/past open trips (10%)
                     startTime = faker.date().past(7, TimeUnit.DAYS)
                             .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    status = "OPEN";
+                    status = Trip.Status.OPEN;
                     availableSeats = random.nextInt(4) + 1;
                     
                 } else {
-                    // Future/upcoming trips (50%)
+                    // Future/upcoming trips (45%)
                     startTime = faker.date().future(30, TimeUnit.DAYS)
                             .toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-                    status = "OPEN";
+                    status = Trip.Status.OPEN;
                     availableSeats = random.nextInt(4) + 1;
                     
                     // Some future trips already have passengers
@@ -645,11 +710,18 @@ public class FakerService {
                         .endLocation(endPoint)
                         .startTime(startTime)
                         .description(description)
-                        .is_archived(status.equals("CANCELLED") || 
-                                (status.equals("COMPLETED") && random.nextDouble() < 0.3))
+                        .is_archived(Trip.Status.CANCELED.equals(status) || 
+                                (Trip.Status.COMPLETED.equals(status) && random.nextDouble() < 0.3))
                         .availableSeats(availableSeats)
                         .price(price)
                         .status(status)
+                        .currentDriverLat(currentDriverLat)
+                        .currentDriverLng(currentDriverLng)
+                        .driverSpeed(driverSpeed)
+                        .driverBearing(driverBearing)
+                        .lastLocationUpdate(lastLocationUpdate)
+                        .averageRating(tripAverageRating)
+                        .totalRatings(tripTotalRatings)
                         .build();
                 
                 trips.add(tripRepository.save(trip));
@@ -683,7 +755,7 @@ public class FakerService {
         
         // Get open trips for new requests
         List<Trip> openTrips = trips.stream()
-                .filter(t -> "OPEN".equals(t.getStatus()) && t.getAvailableSeats() > 0)
+                .filter(t -> Trip.Status.OPEN.equals(t.getStatus()) && t.getAvailableSeats() > 0)
                 .toList();
         
         // Get all trips for historical requests

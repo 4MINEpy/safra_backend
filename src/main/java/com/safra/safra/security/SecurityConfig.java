@@ -39,7 +39,10 @@ public class SecurityConfig {
                         // public auth endpoints
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/cars/**").permitAll()
+                        .requestMatchers("/api/ratings/**").permitAll()
                         .requestMatchers("/trips/**").permitAll()
+                        // serve uploaded files (profile pictures, etc.)
+                        .requestMatchers("/uploads/**").permitAll()
                         // public subscription plans endpoint
                         .requestMatchers(HttpMethod.GET, "/api/subscriptions/plans/**").permitAll()
                         // public payment endpoints (webhook and config)

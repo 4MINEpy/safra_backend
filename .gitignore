@@ -33,4 +33,5 @@ build/
 ### VS Code ###
 .vscode/
 # Ignore Spring Boot application properties
-/src/main/resources/application.properties
+src/main/resources/application.properties
+src/main/resources/firebase-service-account.json
